@@ -1,0 +1,16 @@
+Return-Path: <boletin@example.org>
+Received: from mail.example.org (mail.example.org [203.0.113.10])
+ by mx.destino.es with ESMTPS id 9Ab2; Tue, 04 Aug 2026 09:00:01 +0200
+Authentication-Results: mx.destino.es;
+ spf=pass smtp.mailfrom=example.org;
+ dkim=pass header.d=example.org; dmarc=pass header.from=example.org
+DKIM-Signature: v=1; a=rsa-sha256; d=example.org; s=default; h=from:to:subject;
+ bh=abc=; b=def=
+From: Comunicacion <comunicacion@example.org>
+To: suscriptores@example.org
+Subject: Boletin de agosto
+Date: Tue, 04 Aug 2026 09:00:00 +0200
+Message-ID: <2026080@example.org>
+Content-Type: text/plain; charset="utf-8"
+
+Boletin mensual. Mas informacion en https://www.example.org/boletin
