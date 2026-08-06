@@ -1,0 +1,150 @@
+{
+  "domain": "ayuntamiento-ejemplo.es",
+  "collected_at": "2026-08-06T07:40:11+00:00",
+  "collection": {
+    "resolvers": [
+      "9.9.9.9"
+    ],
+    "resolvable": true,
+    "nxdomain": false,
+    "queries": 612
+  },
+  "spf": {
+    "determinable": true,
+    "records": [
+      "v=spf1 include:_spf.google.com include:spf.protection.outlook.com include:_spf.antiguo-proveedor.es a mx ptr ~all"
+    ],
+    "parsed": {
+      "raw": "v=spf1 include:_spf.google.com include:spf.protection.outlook.com include:_spf.antiguo-proveedor.es a mx ptr ~all",
+      "all": "~",
+      "includes": [
+        "_spf.google.com",
+        "spf.protection.outlook.com",
+        "_spf.antiguo-proveedor.es"
+      ],
+      "redirect": null,
+      "has_ptr": true,
+      "mechanisms": [
+        "include:_spf.google.com",
+        "a",
+        "mx",
+        "ptr",
+        "~all"
+      ],
+      "errors": []
+    },
+    "lookups": 13,
+    "unresolved_includes": [
+      "_spf.antiguo-proveedor.es"
+    ]
+  },
+  "dkim": {
+    "determinable": true,
+    "probed": [
+      "default",
+      "selector1"
+    ],
+    "found": [
+      {
+        "selector": "selector1",
+        "key_type": "rsa",
+        "bits": 1024,
+        "revoked": false,
+        "testing": true,
+        "errors": []
+      }
+    ]
+  },
+  "dmarc": {
+    "determinable": true,
+    "records": [
+      "v=DMARC1; p=none; rua=mailto:informes@dmarc-vendor.com; sp=none"
+    ],
+    "parsed": {
+      "raw": "v=DMARC1; p=none; rua=mailto:informes@dmarc-vendor.com; sp=none",
+      "policy": "none",
+      "subdomain_policy": "none",
+      "effective_subdomain_policy": "none",
+      "percentage": 100,
+      "rua": [
+        "mailto:informes@dmarc-vendor.com"
+      ],
+      "ruf": [],
+      "aspf": "r",
+      "adkim": "r",
+      "enforcing": false,
+      "errors": []
+    },
+    "external_reports": {
+      "dmarc-vendor.com": false
+    }
+  },
+  "mx": {
+    "determinable": true,
+    "records": [
+      {
+        "preference": 10,
+        "exchange": "mail.example.org"
+      }
+    ],
+    "null_mx": false
+  },
+  "dnssec": {
+    "determinable": true,
+    "authenticated": false,
+    "ds": false
+  },
+  "mta_sts": {
+    "determinable": true,
+    "record": "v=STSv1; id=20240101",
+    "policy": null,
+    "mode": null,
+    "policy_error": "HTTP 404"
+  },
+  "tls_rpt": {
+    "determinable": true,
+    "record": null
+  },
+  "dane": {
+    "determinable": true,
+    "hosts": {
+      "mail.ayuntamiento-ejemplo.es": false
+    }
+  },
+  "lookalike": {
+    "determinable": true,
+    "generated": 149,
+    "checked": 149,
+    "registered": [
+      {
+        "domain": "ayuntamiento-ejemplo.com",
+        "kind": "tld",
+        "addresses": [
+          "203.0.113.44"
+        ],
+        "mx": [
+          "mx1.hosting-barato.top"
+        ],
+        "can_receive_mail": true
+      },
+      {
+        "domain": "ayuntamlento-ejemplo.es",
+        "kind": "homoglyph",
+        "addresses": [
+          "198.51.100.12"
+        ],
+        "mx": [],
+        "can_receive_mail": false
+      },
+      {
+        "domain": "ayuntamiento-ejemplo-sede.es",
+        "kind": "affix",
+        "addresses": [
+          "198.51.100.13"
+        ],
+        "mx": [],
+        "can_receive_mail": false
+      }
+    ]
+  }
+}

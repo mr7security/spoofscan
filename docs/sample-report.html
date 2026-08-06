@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>spoofscan — ayuntamiento-ejemplo.es</title>
+<style>
+:root{--bg:#0f1218;--panel:#161b24;--panel2:#1c2230;--line:#273042;--fg:#e6ebf2;
+--muted:#93a0b4;--accent:#4da3ff;--ok:#2eb872;--crit:#b3202e;--high:#d9531e;
+--med:#d9a21e;--low:#3f7fb5;--info:#6b7280}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1080px;margin:0 auto;padding:32px 24px 64px}
+header{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;
+border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:28px}
+h1{font-size:26px;margin:0 0 4px;letter-spacing:-.4px}
+h2{font-size:18px;margin:36px 0 14px}
+.sub{color:var(--muted);font-size:14px;margin:0}
+.toggle{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:6px;
+display:flex;gap:4px}
+.toggle button{background:none;border:0;color:var(--muted);padding:6px 14px;border-radius:6px;
+cursor:pointer;font:inherit;font-size:13px}
+.toggle button.on{background:var(--accent);color:#04101f;font-weight:600}
+.verdict{border-radius:12px;padding:22px 24px;margin-bottom:20px;border:1px solid var(--line)}
+.verdict.yes{background:linear-gradient(90deg,rgba(179,32,46,.28),rgba(179,32,46,.05));
+border-color:var(--crit)}
+.verdict.no{background:linear-gradient(90deg,rgba(46,184,114,.22),rgba(46,184,114,.04));
+border-color:var(--ok)}
+.verdict.unknown{background:var(--panel2)}
+.verdict .q{color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.08em}
+.verdict .a{font-size:26px;font-weight:700;margin:4px 0 6px;letter-spacing:-.3px}
+.verdict .why{color:#cfd8e5;font-size:14px;margin:0}
+.grid{display:grid;grid-template-columns:220px 1fr;gap:20px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px}
+.gauge{display:flex;flex-direction:column;align-items:center;justify-content:center}
+.gauge .val{font-size:34px;font-weight:700}
+.gauge .grade{color:var(--muted);font-size:13px}
+.meta{display:grid;grid-template-columns:repeat(2,1fr);gap:10px 24px;font-size:14px}
+.meta div span{color:var(--muted);display:block;font-size:12px;text-transform:uppercase;
+letter-spacing:.06em}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.pill{border-radius:999px;padding:5px 13px;font-size:13px;font-weight:600;color:#06090f}
+.f{background:var(--panel);border:1px solid var(--line);border-left-width:4px;border-radius:10px;
+padding:18px 20px;margin-bottom:12px}
+.f h3{margin:0 0 6px;font-size:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tag{font-size:11px;font-weight:700;letter-spacing:.08em;padding:3px 8px;border-radius:5px;color:#fff}
+.fid{color:var(--muted);font-size:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.f p{margin:8px 0 0;color:#cfd8e5}
+.rec{margin-top:12px;padding:11px 14px;background:var(--panel2);border-radius:8px;font-size:14px}
+.rec b{color:var(--accent);font-weight:600}
+.ctrl{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap}
+.ctrl span{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;
+border:1px solid var(--line);border-radius:5px;padding:2px 7px;color:var(--muted)}
+.ev{margin-top:10px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;
+color:var(--muted);word-break:break-all}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+td.code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;white-space:nowrap}
+.st{font-weight:600;font-size:13px;white-space:nowrap}
+.st.COMPLIANT{color:var(--ok)}.st.PARTIAL{color:var(--med)}
+.st.NON_COMPLIANT{color:var(--high)}.st.NOT_ASSESSED{color:var(--muted)}
+.rec-dns{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
+background:var(--panel2);border-radius:8px;padding:12px 14px;white-space:pre-wrap;
+word-break:break-all;color:#cfd8e5;margin-top:8px}
+footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);
+font-size:12.5px}
+.es{display:none}
+body.lang-es .en{display:none}body.lang-es .es{display:inline}
+body.lang-es p.es,body.lang-es div.es{display:block}
+@media print{body{background:#fff;color:#111}.toggle{display:none}
+.card,.f{border-color:#ccc;background:#fff}}
+@media(max-width:720px){.grid{grid-template-columns:1fr}.meta{grid-template-columns:1fr}}
+</style></head><body><div class="wrap">
+<header><div><h1>spoofscan</h1>
+  <p class="sub en">Email spoofing &amp; authentication audit — ayuntamiento-ejemplo.es</p>
+  <p class="sub es">Auditoria de suplantacion y autenticacion de correo — ayuntamiento-ejemplo.es</p></div>
+  <div class="toggle"><button data-lang="en" class="on">EN</button>
+    <button data-lang="es">ES</button></div></header>
+
+<div class="verdict yes">
+  <div class="q"><span class="en">Can a stranger send mail as this domain?</span>
+    <span class="es">¿Puede un tercero enviar correo como este dominio?</span></div>
+  <div class="a"><span class="en">Yes</span><span class="es">Si</span></div>
+  <p class="why en">The DMARC policy is p=none, which does not refuse a forged message.</p><p class="why es">La politica DMARC es p=none, que no rechaza un mensaje falsificado.</p>
+</div>
+
+<div class="grid">
+  <div class="card gauge"><svg width="128" height="128" viewBox="0 0 128 128">
+  <circle cx="64" cy="64" r="52" fill="none" stroke="var(--line)" stroke-width="11"/>
+  <circle cx="64" cy="64" r="52" fill="none" stroke="var(--high)" stroke-width="11"
+    stroke-linecap="round" stroke-dasharray="0.0 326.7"
+    transform="rotate(-90 64 64)"/></svg>
+    <div class="val">0<span
+      style="font-size:16px;color:var(--muted)">/100</span></div>
+    <div class="grade"><span class="en">grade E</span><span class="es">nota E</span></div></div>
+  <div class="card"><div class="meta">
+    <div><span class="en">Domain</span><span class="es">Dominio</span>ayuntamiento-ejemplo.es</div>
+    <div><span class="en">Checked</span><span class="es">Comprobado</span>2026-08-06T07:40:11+00:00</div>
+    <div><span class="en">Checks evaluated</span><span class="es">Comprobaciones</span>28/28</div>
+    <div><span class="en">DNS queries</span><span class="es">Consultas DNS</span>612</div>
+  </div><div class="pills"><span class="pill" style="background:#d9531e">HIGH 3</span><span class="pill" style="background:#d9a21e">MEDIUM 9</span><span class="pill" style="background:#3f7fb5">LOW 6</span></div></div>
+</div>
+
+<h2><span class="en">Analysed message</span>
+<span class="es">Mensaje analizado</span></h2>
+<div class="card">
+<div class="meta">
+  <div><span>Subject / Asunto</span>Cambio de cuenta bancaria - urgente antes del cierre</div>
+  <div><span>Date / Fecha</span>Tue, 04 Aug 2026 08:12:38 +0200</div>
+  <div><span>From</span>Direccion Financiera &lt;financiera@example.org&gt; &lt;pagos@mail-envio-facturas.top&gt;</div>
+  <div><span>Return-Path</span>bounce@mail-envio-facturas.top</div>
+  <div><span>Reply-To</span>tesoreria.pagos@contable-gestion.top</div>
+  <div><span>DKIM d=</span>—</div>
+  <div><span>Hops / Saltos</span>2</div>
+  <div><span>Attachments / Adjuntos</span>certificado_bancario.pdf.exe</div>
+</div>
+<div class="ctrl" style="margin-top:14px"><span>spf=fail</span><span>dkim=none</span><span>dmarc=fail</span><span>header.from=example.org</span><span>smtp.mailfrom=mail-envio-facturas.top</span></div></div>
+
+<h2><span class="en">Findings</span><span class="es">Hallazgos</span></h2>
+
+<article class="f" style="border-left-color:#d9531e">
+  <h3><span class="tag" style="background:#d9531e">
+    HIGH</span><span class="en">DMARC policy is p=none: nothing is blocked</span><span class="es">Politica DMARC p=none: no se bloquea nada</span>
+    <span class="fid">DMA-02</span></h3>
+  <p class="en">The domain is in monitoring mode. Reports arrive, but a forged message is still delivered to the recipient&#x27;s inbox. This is the correct first step and the wrong final state; most domains never leave it.</p>
+  <p class="es">El dominio esta en modo monitorizacion. Llegan informes, pero un mensaje falsificado sigue entregandose en la bandeja del destinatario. Es el primer paso correcto y el estado final equivocado; la mayoria de dominios nunca sale de ahi.</p>
+  <div class="rec"><b class="en">Recommendation</b><b class="es">Recomendacion</b>
+    <span class="en"> — Once the aggregate reports show the legitimate senders passing, move to p=quarantine and then p=reject.</span>
+    <span class="es"> — Cuando los informes agregados muestren que los emisores legitimos pasan, cambie a p=quarantine y despues a p=reject.</span></div>
+  <div class="ctrl"><span>ENS mp.s.1</span><span>ENS mp.com.3</span><span>ISO 5.14</span><span style="border-color:var(--accent);color:var(--accent)">RFC 7489 §6.3</span></div><div class="ev">v=DMARC1; p=none; rua=mailto:informes@dmarc-vendor.com; sp=none</div>
+</article>
+<article class="f" style="border-left-color:#d9531e">
+  <h3><span class="tag" style="background:#d9531e">
+    HIGH</span><span class="en">The message failed DMARC and was delivered anyway</span><span class="es">El mensaje fallo DMARC y aun asi se entrego</span>
+    <span class="fid">EML-01</span></h3>
+  <p class="en">The receiving server recorded dmarc=fail and the message still reached the mailbox. Either the sending domain publishes p=none, or the local gateway is configured to ignore the policy.</p>
+  <p class="es">El servidor receptor anoto dmarc=fail y el mensaje llego igualmente al buzon. O el dominio remitente publica p=none, o la pasarela local esta configurada para ignorar la politica.</p>
+  <div class="rec"><b class="en">Recommendation</b><b class="es">Recomendacion</b>
+    <span class="en"> — Check the sending domain&#x27;s policy and make the gateway honour DMARC.</span>
+    <span class="es"> — Compruebe la politica del dominio remitente y haga que la pasarela respete DMARC.</span></div>
+  <div class="ctrl"><span>ENS mp.s.1</span><span>ENS op.exp.7</span><span>ISO 5.26</span><span style="border-color:var(--accent);color:var(--accent)">RFC 7489 §6.6</span></div><div class="ev">dmarc=fail spf=fail dkim=none</div>
+</article>
+<article class="f" style="border-left-color:#d9531e">
+  <h3><span class="tag" style="background:#d9531e">
+    HIGH</span><span class="en">1 similar domain(s) can send and receive mail</span><span class="es">1 dominio(s) parecido(s) pueden enviar y recibir correo</span>
+    <span class="fid">LKA-01</span></h3>
+  <p class="en">These registered domains resemble the audited one and have mail servers: ayuntamiento-ejemplo.com. A message from one of them passes every authentication check, because it is genuinely authenticated — for a domain that is not yours.</p>
+  <p class="es">Estos dominios registrados se parecen al auditado y tienen servidores de correo: ayuntamiento-ejemplo.com. Un mensaje enviado desde uno de ellos supera todas las comprobaciones de autenticacion, porque esta autenticado de verdad, solo que para un dominio que no es el suyo.</p>
+  <div class="rec"><b class="en">Recommendation</b><b class="es">Recomendacion</b>
+    <span class="en"> — Check who owns them; consider defensive registration of the closest ones and add the rest to the mail gateway&#x27;s watchlist.</span>
+    <span class="es"> — Compruebe quien los posee; valore el registro defensivo de los mas cercanos y anada el resto a la lista de vigilancia de la pasarela de correo.</span></div>
+  <div class="ctrl"><span>ENS mp.s.1</span><span>ENS op.mon.3</span><span>ISO 5.14</span><span style="border-color:var(--accent);color:var(--accent)">op.mon.3.r4.1</span></div><div class="ev">ayuntamiento-ejemplo.com</div>
+</article>
+<article class="f" style="border-left-color:#d9a21e">
+  <h3><span class="tag" style="background:#d9a21e">
+    MEDIUM</span><span class="en">External report destination is not authorised</span><span class="es">Destino externo de informes sin autorizar</span>
+    <span class="fid">DMA-08</span></h3>
+  <p class="en">Reports are addressed to dmarc-vendor.com, which does not publish the authorisation record RFC 7489 requires. Compliant senders will not deliver the reports, so the organisation is blind while believing it is monitored.</p>
+  <p class="es">Los informes se dirigen a dmarc-vendor.com, que no publica el registro de autorizacion que exige RFC 7489. Los emisores conformes no enviaran los informes, de modo que la organizacion esta ciega creyendose vigilada.</p>
+  <div class="rec"><b class="en">Recommendation</b><b class="es">Recomendacion</b>
+    <span class="en"> — Ask the provider to publish &lt;domain&gt;._report._dmarc.&lt;their-domain&gt; with v=DMARC1.</span>
+    <span class="es"> — Pida al proveedor que publique &lt;dominio&gt;._report._dmarc.&lt;su-dominio&gt; con v=DMARC1.</span></div>
+  <div class="ctrl"><span>ENS mp.s.1</span><span>ISO 8.16</span><span style="border-color:var(--accent);color:var(--accent)">RFC 7489 §7.1</span></div><div class="ev">dmarc-vendor.com</div>
+</article>
+<article class="f" style="border-left-color:#d9a21e">
+  <h3><span class="tag" style="background:#d9a21e">
+    MEDIUM</span><span class="en">The display name contains a different address</span><span class="es">El nombre mostrado contiene una direccion distinta</span>
+    <span class="fid">EML-03</span></h3>
+  <p class="en">The message is shown as coming from &#x27;Direccion Financiera &lt;financiera@example.org&gt;&#x27; while it was actually sent by pagos@mail-envio-facturas.top. Most mail clients on a phone show only the display name, so the recipient never sees the real address.</p>
+  <p class="es">El mensaje se muestra como procedente de &#x27;Direccion Financiera &lt;financiera@example.org&gt;&#x27; cuando en realidad lo envio pagos@mail-envio-facturas.top. La mayoria de clientes de correo en el movil muestran solo el nombre, asi que el destinatario nunca ve la direccion real.</p>
+  <div class="rec"><b class="en">Recommendation</b><b class="es">Recomendacion</b>
+    <span class="en"> — Configure the gateway to rewrite or flag display names that contain an address.</span>
+    <span class="es"> — Configure la pasarela para reescribir o marcar los nombres que contengan una direccion.</span></div>
+  <div class="ctrl"><span>ENS mp.s.1</span><span>ISO 5.14</span></div><div class="ev">Direccion Financiera &lt;financiera@example.org&gt; != pagos@mail-envio-facturas.top</div>
+</article>
+<article class="f" style="border-left-color:#d9a21e">
+  <h3><span class="tag" style="background:#d9a21e">
+    MEDIUM</span><span class="en">Replies would go to a different domain</span><span class="es">Las respuestas irian a otro dominio</span>
+    <span class="fid">EML-04</span></h3>
+  <p class="en">From: is mail-envio-facturas.top but Reply-To: points at contable-gestion.top. This is the classic shape of CEO fraud: the message looks internal and the answer leaves the organisation.</p>
+  <p class="es">El From: es mail-envio-facturas.top pero el Reply-To: apunta a contable-gestion.top. Es la forma clasica del fraude del CEO: el mensaje parece interno y la respuesta sale de la organizacion.</p>
+  <div class="rec"><b class="en">Recommendation</b><b class="es">Recomendacion</b>
+    <span class="en"> — Flag or quarantine messages whose Reply-To domain differs from the From domain.</span>
+    <span class="es"> — Marque o ponga en cuarentena los mensajes cuyo dominio Reply-To difiera del dominio From.</span></div>
+  <div class="ctrl"><span>ENS mp.s.1</span><span>ISO 5.14</span></div><div class="ev">From=mail-envio-facturas.top Reply-To=contable-gestion.top</div>
+</article>
+<article class="f" style="border-left-color:#d9a21e">
+  <h3><span class="tag" style="background:#d9a21e">
+    MEDIUM</span><span class="en">The message carries risky attachments</span><span class="es">El mensaje lleva adjuntos de riesgo</span>
+    <span class="fid">EML-05</span></h3>
+  <p class="en">Attachments that execute code, carry macros or hide behind a second extension: certificado_bancario.pdf.exe (executable-double-extension).</p>
+  <p class="es">Adjuntos que ejecutan codigo, llevan macros o se esconden tras una segunda extension: certificado_bancario.pdf.exe (executable-double-extension).</p>
+  <div class="rec"><b class="en">Recommendation</b><b class="es">Recomendacion</b>
+    <span class="en"> — Block these types at the gateway and detonate the rest in a sandbox.</span>
+    <span class="es"> — Bloquee estos tipos en la pasarela y detone el resto en un entorno aislado.</span></div>
+  <div class="ctrl"><span>ENS op.exp.6</span><span>ISO 8.7</span></div><div class="ev">certificado_bancario.pdf.exe (executable-double-extension)</div>
+</article>
+<article class="f" style="border-left-color:#d9a21e">
+  <h3><span class="tag" style="background:#d9a21e">
+    MEDIUM</span><span class="en">2 similar domain(s) registered without mail</span><span class="es">2 dominio(s) parecido(s) registrados sin correo</span>
+    <span class="fid">LKA-02</span></h3>
+  <p class="en">These resolve but publish no MX: ayuntamlento-ejemplo.es, ayuntamiento-ejemplo-sede.es. They cannot receive mail today, but they can host a credential harvesting page, and an MX record is one edit away.</p>
+  <p class="es">Estos resuelven pero no publican MX: ayuntamlento-ejemplo.es, ayuntamiento-ejemplo-sede.es. Hoy no pueden recibir correo, pero si alojar una pagina de robo de credenciales, y anadir un MX es cuestion de una edicion.</p>
+  <div class="rec"><b class="en">Recommendation</b><b class="es">Recomendacion</b>
+    <span class="en"> — Review ownership and monitor them for changes.</span>
+    <span class="es"> — Revise su titularidad y vigile si cambian.</span></div>
+  <div class="ctrl"><span>ENS op.mon.3</span><span>ISO 5.14</span><span style="border-color:var(--accent);color:var(--accent)">op.mon.3.r4.1</span></div><div class="ev">ayuntamlento-ejemplo.es, ayuntamiento-ejemplo-sede.es</div>
+</article>
+<article class="f" style="border-left-color:#d9a21e">
+  <h3><span class="tag" style="background:#d9a21e">
+    MEDIUM</span><span class="en">SPF exceeds the 10 DNS lookup limit (13)</span><span class="es">El SPF supera el limite de 10 consultas DNS (13)</span>
+    <span class="fid">SPF-05</span></h3>
+  <p class="en">RFC 7208 caps the DNS-querying terms at ten. Beyond that receivers return permerror and treat the domain as having no usable policy, so the record silently stops protecting anything.</p>
+  <p class="es">RFC 7208 limita a diez los terminos que consultan DNS. Por encima de esa cifra los receptores devuelven permerror y tratan al dominio como si no tuviera politica utilizable, de modo que el registro deja de proteger en silencio.</p>
+  <div class="rec"><b class="en">Recommendation</b><b class="es">Recomendacion</b>
+    <span class="en"> — Flatten or remove includes until the count is ten or fewer; audit which providers still need to be authorised.</span>
+    <span class="es"> — Aplane o elimine includes hasta dejar el recuento en diez o menos; revise que proveedores siguen necesitando autorizacion.</span></div>
+  <div class="ctrl"><span>ENS mp.s.1</span><span>ISO 5.14</span><span style="border-color:var(--accent);color:var(--accent)">RFC 7208 §4.6.4</span></div><div class="ev">13 lookups: _spf.google.com, spf.protection.outlook.com, _spf.antiguo-proveedor.es</div>
+</article>
+<article class="f" style="border-left-color:#d9a21e">
+  <h3><span class="tag" style="background:#d9a21e">
+    MEDIUM</span><span class="en">SPF includes a domain with no SPF record</span><span class="es">El SPF incluye un dominio sin registro SPF</span>
+    <span class="fid">SPF-07</span></h3>
+  <p class="en">These includes do not resolve to an SPF record: _spf.antiguo-proveedor.es. Each one is a permerror waiting to happen, and usually marks a provider that was decommissioned without updating DNS.</p>
+  <p class="es">Estos includes no resuelven a un registro SPF: _spf.antiguo-proveedor.es. Cada uno es un permerror en potencia y suele senalar a un proveedor dado de baja sin actualizar el DNS.</p>
+  <div class="rec"><b class="en">Recommendation</b><b class="es">Recomendacion</b>
+    <span class="en"> — Remove the stale includes, or fix the provider record they point at.</span>
+    <span class="es"> — Elimine los includes obsoletos, o corrija el registro del proveedor al que apuntan.</span></div>
+  <div class="ctrl"><span>ENS mp.s.1</span><span>ISO 5.14</span><span style="border-color:var(--accent);color:var(--accent)">RFC 7208 §4.6.4</span></div><div class="ev">_spf.antiguo-proveedor.es</div>
+</article>
+<article class="f" style="border-left-color:#d9a21e">
+  <h3><span class="tag" style="background:#d9a21e">
+    MEDIUM</span><span class="en">The zone is not signed with DNSSEC</span><span class="es">La zona no esta firmada con DNSSEC</span>
+    <span class="fid">TRA-04</span></h3>
+  <p class="en">Every control above lives in DNS. Without DNSSEC an attacker who can tamper with resolution can replace the SPF, DKIM and DMARC answers themselves, and DANE cannot be used at all.</p>
+  <p class="es">Todos los controles anteriores viven en el DNS. Sin DNSSEC, un atacante capaz de manipular la resolucion puede sustituir las propias respuestas de SPF, DKIM y DMARC, y DANE no se puede utilizar en absoluto.</p>
+  <div class="rec"><b class="en">Recommendation</b><b class="es">Recomendacion</b>
+    <span class="en"> — Sign the zone and publish the DS record at the registrar.</span>
+    <span class="es"> — Firme la zona y publique el registro DS en el registrador.</span></div>
+  <div class="ctrl"><span>ENS mp.com.3</span><span>ISO 8.21</span><span style="border-color:var(--accent);color:var(--accent)">RFC 4033</span></div>
+</article>
+<article class="f" style="border-left-color:#d9a21e">
+  <h3><span class="tag" style="background:#d9a21e">
+    MEDIUM</span><span class="en">MTA-STS is announced but the policy cannot be used</span><span class="es">MTA-STS esta anunciado pero la politica no se puede usar</span>
+    <span class="fid">TRA-06</span></h3>
+  <p class="en">The DNS record advertises MTA-STS while the policy file could not be retrieved or is not conformant: HTTP 404. Senders fall back to opportunistic TLS, so the protection is announced but absent.</p>
+  <p class="es">El registro DNS anuncia MTA-STS mientras que el fichero de politica no se ha podido recuperar o no es conforme: HTTP 404. Los emisores vuelven a TLS oportunista, de modo que la proteccion se anuncia pero no existe.</p>
+  <div class="rec"><b class="en">Recommendation</b><b class="es">Recomendacion</b>
+    <span class="en"> — Serve the policy at https://mta-sts.&lt;domain&gt;/.well-known/mta-sts.txt as text/plain, with version, mode, max_age and at least one mx, and without redirects.</span>
+    <span class="es"> — Sirva la politica en https://mta-sts.&lt;dominio&gt;/.well-known/mta-sts.txt como text/plain, con version, mode, max_age y al menos un mx, y sin redirecciones.</span></div>
+  <div class="ctrl"><span>ENS mp.com.2</span><span>ISO 8.21</span><span>ISO 8.24</span><span style="border-color:var(--accent);color:var(--accent)">RFC 8461 §3.3</span></div><div class="ev">HTTP 404</div>
+</article>
+<article class="f" style="border-left-color:#3f7fb5">
+  <h3><span class="tag" style="background:#3f7fb5">
+    LOW</span><span class="en">DKIM selector in test mode or revoked</span><span class="es">Selector DKIM en modo prueba o revocado</span>
+    <span class="fid">DKI-03</span></h3>
+  <p class="en">A key flagged t=y asks receivers to ignore failures, and a key with an empty p= is revoked. Either way the signature carries no weight. in test mode (t=y): selector1</p>
+  <p class="es">Una clave marcada t=y pide a los receptores que ignoren los fallos, y una clave con p= vacio esta revocada. En ambos casos la firma no aporta nada. in test mode (t=y): selector1</p>
+  <div class="rec"><b class="en">Recommendation</b><b class="es">Recomendacion</b>
+    <span class="en"> — Remove t=y once the deployment is validated, and delete revoked selectors from DNS.</span>
+    <span class="es"> — Elimine t=y cuando el despliegue este validado, y borre del DNS los selectores revocados.</span></div>
+  <div class="ctrl"><span>ENS mp.com.3</span><span>ISO 8.24</span><span style="border-color:var(--accent);color:var(--accent)">RFC 6376 §3.6.1</span></div><div class="ev">in test mode (t=y): selector1</div>
+</article>
+<article class="f" style="border-left-color:#3f7fb5">
+  <h3><span class="tag" style="background:#3f7fb5">
+    LOW</span><span class="en">DKIM key of 1024 bits</span><span class="es">Clave DKIM de 1024 bits</span>
+    <span class="fid">DKI-04</span></h3>
+  <p class="en">1024 bits is the floor RFC 8301 still accepts, but it recommends 2048 and the margin has been shrinking for a decade.</p>
+  <p class="es">1024 bits es el minimo que RFC 8301 todavia acepta, pero recomienda 2048 y el margen lleva una decada estrechandose.</p>
+  <div class="rec"><b class="en">Recommendation</b><b class="es">Recomendacion</b>
+    <span class="en"> — Plan a rotation to 2048 bits at the next key change.</span>
+    <span class="es"> — Planifique la rotacion a 2048 bits en el proximo cambio de clave.</span></div>
+  <div class="ctrl"><span>ENS mp.com.3</span><span>ISO 8.24</span><span style="border-color:var(--accent);color:var(--accent)">RFC 8301 §3.2</span></div><div class="ev">selector1=1024b</div>
+</article>
+<article class="f" style="border-left-color:#3f7fb5">
+  <h3><span class="tag" style="background:#3f7fb5">
+    LOW</span><span class="en">The message contains suspicious links</span><span class="es">El mensaje contiene enlaces sospechosos</span>
+    <span class="fid">EML-06</span></h3>
+  <p class="en">Links that point at a bare IP address, use punycode, bury the real host under many subdomains or hide credentials in the URL: https://198.51.100.77/portal/validar (ip-literal), https://acceso.seguro.pagos.cliente.example.org.verificacion (deep-subdomain).</p>
+  <p class="es">Enlaces que apuntan a una IP desnuda, usan punycode, entierran el host real bajo muchos subdominios u ocultan credenciales en la URL: https://198.51.100.77/portal/validar (ip-literal), https://acceso.seguro.pagos.cliente.example.org.verificacion (deep-subdomain).</p>
+  <div class="rec"><b class="en">Recommendation</b><b class="es">Recomendacion</b>
+    <span class="en"> — Rewrite links at the gateway and check the destinations before anyone clicks.</span>
+    <span class="es"> — Reescriba los enlaces en la pasarela y compruebe los destinos antes de que nadie pulse.</span></div>
+  <div class="ctrl"><span>ENS mp.s.1</span><span>ISO 5.14</span></div><div class="ev">https://198.51.100.77/portal/validar (ip-literal), https://acceso.seguro.pagos.cliente.example.org.verificacion (deep-subdomain)</div>
+</article>
+<article class="f" style="border-left-color:#3f7fb5">
+  <h3><span class="tag" style="background:#3f7fb5">
+    LOW</span><span class="en">SPF uses the deprecated ptr mechanism</span><span class="es">El SPF usa el mecanismo ptr, obsoleto</span>
+    <span class="fid">SPF-06</span></h3>
+  <p class="en">RFC 7208 discourages ptr: it is slow, unreliable and some receivers ignore it entirely, so the hosts it was meant to authorise may fail.</p>
+  <p class="es">RFC 7208 desaconseja ptr: es lento, poco fiable y algunos receptores lo ignoran por completo, por lo que los equipos que pretendia autorizar pueden fallar.</p>
+  <div class="rec"><b class="en">Recommendation</b><b class="es">Recomendacion</b>
+    <span class="en"> — Replace ptr with explicit ip4/ip6 or a/mx mechanisms.</span>
+    <span class="es"> — Sustituya ptr por mecanismos ip4/ip6 o a/mx explicitos.</span></div>
+  <div class="ctrl"><span>ENS mp.s.1</span><span>ISO 5.14</span><span style="border-color:var(--accent);color:var(--accent)">RFC 7208 §5.5</span></div>
+</article>
+<article class="f" style="border-left-color:#3f7fb5">
+  <h3><span class="tag" style="background:#3f7fb5">
+    LOW</span><span class="en">No TLS-RPT reporting configured</span><span class="es">Sin informes TLS-RPT configurados</span>
+    <span class="fid">TRA-03</span></h3>
+  <p class="en">Nothing tells the organisation when another server failed to establish TLS with its mail servers, which is the first symptom of both a misconfiguration and an interception attempt.</p>
+  <p class="es">Nada avisa a la organizacion de que otro servidor no ha podido establecer TLS con sus servidores de correo, que es el primer sintoma tanto de un error de configuracion como de un intento de interceptacion.</p>
+  <div class="rec"><b class="en">Recommendation</b><b class="es">Recomendacion</b>
+    <span class="en"> — Publish _smtp._tls.&lt;domain&gt; with v=TLSRPTv1 and a rua= destination.</span>
+    <span class="es"> — Publique _smtp._tls.&lt;dominio&gt; con v=TLSRPTv1 y un destino rua=.</span></div>
+  <div class="ctrl"><span>ENS mp.com.2</span><span>ISO 8.16</span><span style="border-color:var(--accent);color:var(--accent)">RFC 8460 §3</span></div>
+</article>
+<article class="f" style="border-left-color:#3f7fb5">
+  <h3><span class="tag" style="background:#3f7fb5">
+    LOW</span><span class="en">No DANE (TLSA) records for the mail servers</span><span class="es">Sin registros DANE (TLSA) en los servidores de correo</span>
+    <span class="fid">TRA-05</span></h3>
+  <p class="en">DANE pins the certificate of each mail server in signed DNS. It is optional and only works on a signed zone, but it is the strongest available guarantee that mail to this domain is not intercepted.</p>
+  <p class="es">DANE ancla el certificado de cada servidor de correo en un DNS firmado. Es opcional y solo funciona sobre zona firmada, pero es la garantia mas fuerte disponible de que el correo a este dominio no se intercepta.</p>
+  <div class="rec"><b class="en">Recommendation</b><b class="es">Recomendacion</b>
+    <span class="en"> — Once the zone is signed, publish TLSA records at _25._tcp.&lt;mx&gt;.</span>
+    <span class="es"> — Cuando la zona este firmada, publique registros TLSA en _25._tcp.&lt;mx&gt;.</span></div>
+  <div class="ctrl"><span>ENS mp.com.2</span><span>ISO 8.24</span><span style="border-color:var(--accent);color:var(--accent)">RFC 7672 §3</span></div><div class="ev">mail.ayuntamiento-ejemplo.es</div>
+</article>
+
+<h2><span class="en">Similar registered domains</span>
+<span class="es">Dominios parecidos registrados</span></h2>
+<div class="card"><table><thead><tr>
+  <th><span class="en">Domain</span><span class="es">Dominio</span></th>
+  <th><span class="en">Similarity</span><span class="es">Parecido</span></th>
+  <th><span class="en">Mail</span><span class="es">Correo</span></th>
+  <th>MX / A</th></tr></thead><tbody><tr>
+  <td class="code">ayuntamiento-ejemplo.com</td>
+  <td><span class="en">same name, different TLD</span><span class="es">mismo nombre, otro dominio de primer nivel</span></td>
+  <td class="st NON_COMPLIANT">
+    <span class="en">yes</span><span class="es">si</span></td>
+  <td class="code">mx1.hosting-barato.top</td>
+</tr><tr>
+  <td class="code">ayuntamiento-ejemplo-sede.es</td>
+  <td><span class="en">service-looking prefix or suffix</span><span class="es">prefijo o sufijo con aspecto de servicio</span></td>
+  <td class="st PARTIAL">
+    <span class="en">no</span><span class="es">no</span></td>
+  <td class="code">198.51.100.13</td>
+</tr><tr>
+  <td class="code">ayuntamlento-ejemplo.es</td>
+  <td><span class="en">visually similar characters</span><span class="es">caracteres visualmente similares</span></td>
+  <td class="st PARTIAL">
+    <span class="en">no</span><span class="es">no</span></td>
+  <td class="code">198.51.100.12</td>
+</tr></tbody></table>
+<p class="en" style="color:var(--muted);font-size:13px;margin:12px 0 0">
+149 of 149 generated candidates
+resolved.</p>
+<p class="es" style="color:var(--muted);font-size:13px;margin:12px 0 0">
+Resolvieron 149 de 149 candidatos
+generados.</p></div>
+<h2><span class="en">Records to publish</span>
+<span class="es">Registros que publicar</span></h2>
+<div class="card">
+<p class="en" style="margin:0">A starting point, to be adjusted to the real senders. Move the
+DMARC policy to quarantine and then reject once the aggregate reports are clean.</p>
+<p class="es" style="margin:0">Un punto de partida, a ajustar a los emisores reales. Pase la
+politica DMARC a quarantine y despues a reject cuando los informes agregados esten limpios.</p>
+<div class="rec-dns">_smtp._tls.ayuntamiento-ejemplo.es.      IN TXT  &quot;v=TLSRPTv1; rua=mailto:tlsrpt@ayuntamiento-ejemplo.es&quot;</div></div>
+
+<h2><span class="en">Control status (Statement of Applicability)</span>
+    <span class="es">Estado de los controles (declaracion de aplicabilidad)</span></h2>
+<div class="card"><table><thead><tr>
+  <th>Control</th>
+  <th><span class="en">Title</span><span class="es">Titulo</span></th>
+  <th><span class="en">Status</span><span class="es">Estado</span></th>
+  <th><span class="en">Findings</span><span class="es">Hallazgos</span></th>
+</tr></thead><tbody><tr>
+  <td class="code">ENS mp.s.1</td>
+  <td><span class="en">Email protection</span><span class="es">Proteccion del correo electronico</span></td>
+  <td class="st NON_COMPLIANT"><span class="en">NON_COMPLIANT</span>
+      <span class="es">NO CUMPLE</span></td>
+  <td class="code">SPF-05, SPF-06, SPF-07, DMA-02, DMA-08, LKA-01, EML-01, EML-03, EML-04, EML-06</td></tr><tr>
+  <td class="code">ENS mp.com.2</td>
+  <td><span class="en">Protection of confidentiality</span><span class="es">Proteccion de la confidencialidad</span></td>
+  <td class="st PARTIAL"><span class="en">PARTIAL</span>
+      <span class="es">PARCIAL</span></td>
+  <td class="code">TRA-06, TRA-03, TRA-05</td></tr><tr>
+  <td class="code">ENS mp.com.3</td>
+  <td><span class="en">Protection of integrity and authenticity</span><span class="es">Proteccion de la integridad y de la autenticidad</span></td>
+  <td class="st NON_COMPLIANT"><span class="en">NON_COMPLIANT</span>
+      <span class="es">NO CUMPLE</span></td>
+  <td class="code">DKI-04, DKI-03, DMA-02, TRA-04</td></tr><tr>
+  <td class="code">ENS op.exp.6</td>
+  <td><span class="en">Protection against malicious code</span><span class="es">Proteccion frente a codigo danino</span></td>
+  <td class="st PARTIAL"><span class="en">PARTIAL</span>
+      <span class="es">PARCIAL</span></td>
+  <td class="code">EML-05</td></tr><tr>
+  <td class="code">ENS op.exp.7</td>
+  <td><span class="en">Incident management</span><span class="es">Gestion de incidentes</span></td>
+  <td class="st NON_COMPLIANT"><span class="en">NON_COMPLIANT</span>
+      <span class="es">NO CUMPLE</span></td>
+  <td class="code">EML-01</td></tr><tr>
+  <td class="code">ENS op.mon.3</td>
+  <td><span class="en">Surveillance</span><span class="es">Vigilancia</span></td>
+  <td class="st NON_COMPLIANT"><span class="en">NON_COMPLIANT</span>
+      <span class="es">NO CUMPLE</span></td>
+  <td class="code">LKA-01, LKA-02</td></tr><tr>
+  <td class="code">ISO 5.14</td>
+  <td><span class="en">Information transfer</span><span class="es">Transferencia de informacion</span></td>
+  <td class="st NON_COMPLIANT"><span class="en">NON_COMPLIANT</span>
+      <span class="es">NO CUMPLE</span></td>
+  <td class="code">SPF-05, SPF-06, SPF-07, DMA-02, LKA-01, LKA-02, EML-03, EML-04, EML-06</td></tr><tr>
+  <td class="code">ISO 5.26</td>
+  <td><span class="en">Response to information security incidents</span><span class="es">Respuesta a incidentes de seguridad de la informacion</span></td>
+  <td class="st NON_COMPLIANT"><span class="en">NON_COMPLIANT</span>
+      <span class="es">NO CUMPLE</span></td>
+  <td class="code">EML-01</td></tr><tr>
+  <td class="code">ISO 8.7</td>
+  <td><span class="en">Protection against malware</span><span class="es">Proteccion contra el malware</span></td>
+  <td class="st PARTIAL"><span class="en">PARTIAL</span>
+      <span class="es">PARCIAL</span></td>
+  <td class="code">EML-05</td></tr><tr>
+  <td class="code">ISO 8.16</td>
+  <td><span class="en">Monitoring activities</span><span class="es">Actividades de seguimiento</span></td>
+  <td class="st PARTIAL"><span class="en">PARTIAL</span>
+      <span class="es">PARCIAL</span></td>
+  <td class="code">DMA-08, TRA-03</td></tr><tr>
+  <td class="code">ISO 8.20</td>
+  <td><span class="en">Networks security</span><span class="es">Seguridad de redes</span></td>
+  <td class="st COMPLIANT"><span class="en">COMPLIANT</span>
+      <span class="es">CUMPLE</span></td>
+  <td class="code">—</td></tr><tr>
+  <td class="code">ISO 8.21</td>
+  <td><span class="en">Security of network services</span><span class="es">Seguridad de los servicios de red</span></td>
+  <td class="st PARTIAL"><span class="en">PARTIAL</span>
+      <span class="es">PARCIAL</span></td>
+  <td class="code">TRA-06, TRA-04</td></tr><tr>
+  <td class="code">ISO 8.24</td>
+  <td><span class="en">Use of cryptography</span><span class="es">Uso de criptografia</span></td>
+  <td class="st PARTIAL"><span class="en">PARTIAL</span>
+      <span class="es">PARCIAL</span></td>
+  <td class="code">DKI-04, DKI-03, TRA-06, TRA-05</td></tr></tbody></table></div>
+
+<footer>
+<p class="en">Read-only assessment built from public DNS records and, where published, the
+domain's own MTA-STS policy. No mail was sent and no system was accessed. The ENS / ISO
+cross-mapping is orientative and does not replace the organisation's Statement of
+Applicability.</p>
+<p class="es">Evaluacion de solo lectura a partir de registros DNS publicos y, cuando esta
+publicada, la propia politica MTA-STS del dominio. No se ha enviado ningun correo ni se ha
+accedido a ningun sistema. El mapeo ENS / ISO es orientativo y no sustituye a la declaracion de
+aplicabilidad de la organizacion.</p>
+</footer></div><script>
+function setLang(l){document.body.classList.toggle('lang-es',l==='es');
+document.querySelectorAll('.toggle button').forEach(function(b){
+b.classList.toggle('on',b.dataset.lang===l)});}
+document.querySelectorAll('.toggle button').forEach(function(b){
+b.addEventListener('click',function(){setLang(b.dataset.lang)})});
+</script></body></html>
