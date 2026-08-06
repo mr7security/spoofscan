@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "spoofscan"
+version = "0.1.0"
+description = "Email spoofing and authentication auditor (SPF, DKIM, DMARC, MTA-STS) for ENS and ISO/IEC 27001"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Miguel David Rebolledo Romero" }]
+keywords = ["spf", "dkim", "dmarc", "mta-sts", "email-security", "phishing",
+            "ens", "iso27001", "compliance", "cybersecurity"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: System Administrators",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Topic :: Security",
+  "Topic :: Communications :: Email",
+]
+dependencies = []
+
+[project.optional-dependencies]
+soa = ["openpyxl>=3.1"]
+
+[project.scripts]
+spoofscan = "spoofscan.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/mr7security/spoofscan"
+Issues = "https://github.com/mr7security/spoofscan/issues"
+
+[tool.setuptools.packages.find]
+include = ["spoofscan*"]

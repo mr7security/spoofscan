@@ -1,0 +1,4 @@
+# spoofscan runs on the Python standard library alone: the DNS client is built
+# in, so there is no dnspython dependency.
+# openpyxl is only needed for the --soa Statement of Applicability workbook.
+openpyxl>=3.1
